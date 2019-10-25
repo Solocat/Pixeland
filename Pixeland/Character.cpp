@@ -53,7 +53,7 @@ void Character::setHitbox(unsigned w, unsigned h)
 	origin.y = (double)h;
 }
 
-bool Character::move(double deltaTime, const Tilemap& map)
+bool Character::move(double deltaTime, const std::vector<bool>& map)
 {
 	bool moved = false;	//character has moved a whole pixel *clapclap*
 	////////////////Y_AXIS///////////////////////////
@@ -154,7 +154,7 @@ bool Character::move(double deltaTime, const Tilemap& map)
 	int targetDist = 0;
 	if (velocity.x < 0.0)
 	{
-		if (facingRight == true) sprite.setScale(-1.f, 1.f); //rotate sprite
+		//if (facingRight == true) sprite.setScale(-1.f, 1.f); //rotate sprite
 		facingRight = false;
 		position.x += fmax(velocity.x * deltaTime, -scanBoundary(Direction::LEFT, map));
 		if (hitbox.left != int(position.x - origin.x))
@@ -201,12 +201,11 @@ void Character::moveTo(double x, double y)
 void Character::jumpivate()
 {
 	airBorne = true;
-	//velocity.y = -jumpVelocity;
 	startJumpVector = jumpVelocity;
 	changeAnim(AnimState::JUMP);
 }
 
-double Character::scanDistance(double edge, const Tilemap& map, Direction direction, intVector firstTile, intVector lastTile)
+double Character::scanDistance(double edge, const std::vector<bool>& map, Direction direction, intVector firstTile, intVector lastTile)
 {
 	double distance = 0.0;
 
@@ -232,9 +231,9 @@ double Character::scanDistance(double edge, const Tilemap& map, Direction direct
 				distIndex < minDist
 				&& xi >= 0
 				&& yi >= 0
-				&& xi < map.horiTiles
-				&& yi < map.vertiTiles
-				&& map.getTile(xi, yi) != 1
+				&& xi < 1024
+				&& yi < 512
+				&& map[yi * 1024 + xi] == false
 				)
 			{
 
@@ -253,23 +252,23 @@ double Character::scanDistance(double edge, const Tilemap& map, Direction direct
 
 	switch (direction)
 	{
-	case Direction::LEFT:	distance = edge - ++xi*map.tileRes;	break;
-	case Direction::RIGHT:	distance = xi*map.tileRes - edge;	break;
-	case Direction::UP:		distance = edge - ++yi*map.tileRes;	break;
-	case Direction::DOWN:	distance = yi*map.tileRes - edge;	break;
+	case Direction::LEFT:	distance = edge - ++xi;	break;
+	case Direction::RIGHT:	distance = xi - edge;	break;
+	case Direction::UP:		distance = edge - ++yi;	break;
+	case Direction::DOWN:	distance = yi - edge;	break;
 	}
 
 	return signbit(distance) ? 0.0 : distance;
 }
 
-double Character::scanBoundary(Direction direction, const Tilemap& map)
+double Character::scanBoundary(Direction direction, const std::vector<bool>& map)
 {
 	//scanner's shape is simplified: find every tile which scanner's hitbox overlaps with
 	//get the first and last indices of these tiles in both axes
-	int x1 =  hitbox.left / map.tileRes;
-	int x2 = (hitbox.left + hitbox.width - 1) / map.tileRes;
-	int y1 = hitbox.top / map.tileRes;
-	int y2 = (hitbox.top + hitbox.height - 1) / map.tileRes;
+	int x1 =  hitbox.left;
+	int x2 = (hitbox.left + hitbox.width - 1);
+	int y1 = hitbox.top;
+	int y2 = (hitbox.top + hitbox.height - 1);
 
 	intVector tile1;
 	intVector tile2;
@@ -312,10 +311,10 @@ double Character::scanBoundary(Direction direction, const Tilemap& map)
 	return scanDistance(edge, map, direction, tile1, tile2);
 }
 
-void Character::render(Window& window)
+void Character::render(sf::RenderWindow& window)
 {
 	sprite.setPosition((int)position.x, (int)position.y);
-	window.win.draw(sprite);
+	window.draw(sprite);
 }
 
 void Character::animate(double deltaTime)
@@ -341,4 +340,9 @@ void Character::changeAnim(AnimState state)
 	sprite.setTextureRect(sprites->getRect(currentFrame));
 
 	frameCounter = 0.0;
+}
+
+void Character::shoot()
+{
+	
 }

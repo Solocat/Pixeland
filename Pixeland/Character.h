@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Tilemap.h"
+#include <vector>
 #include "Spritesheet.h"
 #include "Animation.h"
 //#include <SFML/Graphics.hpp>
@@ -41,14 +41,15 @@ public:
 	Character();
 	void setSpritesheet(Spritesheet* sheet);
 	void setHitbox(unsigned w, unsigned h);
-	bool move(double deltaTime, const Tilemap& map);	//returns: whether character's rectangle has moved
+	bool move(double deltaTime, const std::vector<bool>& map);	//returns: whether character's rectangle has moved
 	void moveTo(double x, double y);
 	void jumpivate();
-	double scanDistance(double edge, const Tilemap& map, Direction direction, intVector firstTile, intVector lastTile);
-	double scanBoundary(Direction direction, const Tilemap& map);
-	void render(Window& window);
+	double scanDistance(double edge, const std::vector<bool>&, Direction direction, intVector firstTile, intVector lastTile);
+	double scanBoundary(Direction direction, const std::vector<bool>&);
+	void render(sf::RenderWindow& window);
 	void animate(double deltaTime);
 	void changeAnim(AnimState state);
+	void shoot();
 
 	sf::Sprite sprite;
 	Spritesheet* sprites;

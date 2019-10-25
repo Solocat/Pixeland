@@ -1,32 +1,28 @@
 #include <SFML/Graphics.hpp>
 #include "Character.h"
-#include <array>
+#include <vector>
 
 int main()
 {
 	const int resX = 1024;
 	const int resY = 512;
-	sf::RenderWindow window;
-	window.create(sf::VideoMode(resX, resY), "Pixeland");
-	window.setFramerateLimit(60);
-	sf::View view = window.getDefaultView();
-	view.setCenter(200, 200);
-	view.zoom(0.25);
-	window.setView(view);
-
+	Window window("Platform", resX, resY, 120);
+	window.camera.zoom(0.25);
 	sf::Image img;
 	img.loadFromFile("dirtmap.png");
 	
-	std::array<bool, resX * resY> hardMask;
-
+	std::vector<bool> hardMask(resX*resY);
+	//hardMask.reserve(resX * resY);
+	std::fill(hardMask.begin(), hardMask.end(), false);
 	for (int i = 0; i < resX * resY; i++)
 	{
-		if (img.getPixel(i % resX, i / resX) == sf::Color::Magenta)
+		if (img.getPixel(i % resX, i / resX) != sf::Color::Magenta)
 		{
-			hardMask[i] = false;
+			hardMask[i] = true;
 		}
-		else hardMask[i] = true;
 	}
+	hardMask.shrink_to_fit();
+
 	img.createMaskFromColor(sf::Color::Magenta);
 
 	sf::Texture tex;
@@ -34,42 +30,38 @@ int main()
 	sf::Sprite map;
 	map.setTexture(tex);
 
-	/*
+	
 	Character player;
-	player.gravity = 3000.0;
-	player.runSpeed = 10 * TileRes;
-	player.jumpVelocity = 22 * TileRes;
+	player.gravity = 1500.0;
+	player.runSpeed = 10 * 8;
+	player.jumpVelocity = 22 * 8;
 	player.jumpTimeMax = 0.14;
-	player.terminalVelocity = 22 * TileRes;
+	player.terminalVelocity = 22 * 8;
 
-	player.setHitbox(TileRes, 52);
+	player.setHitbox(1, 1);
 
-	Spritesheet playerSprites("runnyC.png", 48, 64, true);
+	Spritesheet playerSprites("soldier.png", 3, 4, true);
 	player.setSpritesheet(&playerSprites);
 
-	player.anims[AnimState::IDLE] = Animation(7, 0, 0.0);
-	player.anims[AnimState::MOVE] = Animation(0, 8, 0.01875);
-	player.anims[AnimState::JUMP] = Animation(1, 0, 0.0);
-	player.anims[AnimState::FALL] = Animation(6, 0, 0.0);
+	player.anims[AnimState::IDLE] = Animation(0, 0, 0.0);
+	player.anims[AnimState::MOVE] = Animation(0, 0, 0.01875);
+	player.anims[AnimState::JUMP] = Animation(0, 0, 0.0);
+	player.anims[AnimState::FALL] = Animation(0, 0, 0.0);
 	player.changeAnim(AnimState::IDLE);
 	
-	player.moveTo(112, SCREEN_HEIGHT - 128);
-	*/
+	player.moveTo(200, 200);
 	
-	
-
-	sf::RectangleShape player;
-	player.setFillColor(sf::Color::Red);
-	player.setSize(sf::Vector2f(1, 1));
-	//player.setOrigin(0.5, 0.5);
-	player.setPosition(200, 200);
 	float speed = 0.5;
 
+	sf::Clock clock;
 	bool quit = false;
 	while (!quit)
 	{
+		sf::Time frameTime = clock.restart();
+		if (frameTime.asMilliseconds() > 100) frameTime = sf::milliseconds(100);	//at low framerates game becomes fps dependent to avoid collision errors etc.
+		//event block
 		sf::Event e;
-		while (window.pollEvent(e))
+		while (window.win.pollEvent(e))
 		{
 			switch (e.type)
 			{
@@ -80,51 +72,79 @@ int main()
 			}
 			case sf::Event::KeyPressed:
 			{
-
+				switch (e.key.code)
+				{
+				case sf::Keyboard::A:
+				case sf::Keyboard::Left:
+				{
+					player.velocity.x = -player.runSpeed;
+					break;
+				}
+				case sf::Keyboard::D:
+				case sf::Keyboard::Right:
+				{
+					player.velocity.x = player.runSpeed;
+					break;
+				}
 				default: break;
 				}
 				break;
 			}
-		}
-
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-		{ 
-			player.move(-speed, 0); 
-			sf::Vector2i pos = (sf::Vector2i)player.getPosition();
-			if (hardMask[pos.y * resX + pos.x]) 
+			case sf::Event::KeyReleased:
 			{
-				pos.x++;
-				player.setPosition((sf::Vector2f)pos);
+				switch (e.key.code)
+				{
+				case sf::Keyboard::A:
+				case sf::Keyboard::Left:
+				{
+					if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) || sf::Keyboard::isKeyPressed(sf::Keyboard::D)) player.velocity.x = player.runSpeed;
+					else player.velocity.x = 0.0;
+					break;
+				}
+				case sf::Keyboard::D:
+				case sf::Keyboard::Right:
+				{
+					if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::A)) player.velocity.x = -player.runSpeed;
+					else player.velocity.x = 0.0;
+					break;
+				}
+				default: break;
+				}
+				break;
+			}
+			case sf::Event::MouseButtonPressed: 
+			{
+
+				player.shoot();
+				break;
+			}
+			default: break;
 			}
 		}
-		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) 
-		{ 
-			player.move(speed, 0); 
-			sf::Vector2i pos = (sf::Vector2i)player.getPosition();
-			pos.x++;
-			if (hardMask[pos.y * resX + pos.x])
-			{
-				pos.x--;
-				player.setPosition((sf::Vector2f)pos);
-			}
-		}
 
-		player.move(0, 0.2f);
-
-		sf::Vector2i pos = (sf::Vector2i)player.getPosition();
-		pos.y++;
-		if (hardMask[pos.y * resX + pos.x])
+		//movement block
+		if (!player.freeFall)
 		{
-			pos.y--;
-			player.setPosition((sf::Vector2f)pos);
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+			{
+				player.jumpivate();
+			}
+			else if (player.airBorne)
+			{
+				player.freeFall = true;
+			}
 		}
 
-		view.setCenter(player.getPosition());
-		window.setView(view);
+		if (player.move(frameTime.asSeconds(), hardMask))
+		{
+			window.follow((int)player.position.x, (int)player.position.y, sf::Vector2i(resX, resY), 4*8);
+		}
+		player.animate(frameTime.asSeconds());
 
-		window.clear();
-		window.draw(map);
-		window.draw(player);
-		window.display();
+
+		window.win.clear();
+		window.win.draw(map);
+		player.render(window.win);
+		window.win.display();
 	}
 }
