@@ -6,30 +6,10 @@ int main()
 {
 	const int resX = 1024;
 	const int resY = 512;
-	Window window("Platform", resX, resY, 120);
+	Window window("Platform", resX, resY, 60);
 	window.camera.zoom(0.25);
-	sf::Image img;
-	img.loadFromFile("dirtmap.png");
 	
-	std::vector<bool> hardMask(resX*resY);
-	//hardMask.reserve(resX * resY);
-	std::fill(hardMask.begin(), hardMask.end(), false);
-	for (int i = 0; i < resX * resY; i++)
-	{
-		if (img.getPixel(i % resX, i / resX) != sf::Color::Magenta)
-		{
-			hardMask[i] = true;
-		}
-	}
-	hardMask.shrink_to_fit();
-
-	img.createMaskFromColor(sf::Color::Magenta);
-
-	sf::Texture tex;
-	tex.loadFromImage(img);
-	sf::Sprite map;
-	map.setTexture(tex);
-
+	Gamemap map("dirtmap.png");
 	
 	Character player;
 	player.gravity = 1500.0;
@@ -50,8 +30,6 @@ int main()
 	player.changeAnim(AnimState::IDLE);
 	
 	player.moveTo(200, 200);
-	
-	float speed = 0.5;
 
 	sf::Clock clock;
 	bool quit = false;
@@ -135,15 +113,14 @@ int main()
 			}
 		}
 
-		if (player.move(frameTime.asSeconds(), hardMask))
+		if (player.move(frameTime.asSeconds(), map))
 		{
 			window.follow((int)player.position.x, (int)player.position.y, sf::Vector2i(resX, resY), 4*8);
 		}
 		player.animate(frameTime.asSeconds());
 
-
 		window.win.clear();
-		window.win.draw(map);
+		window.win.draw(map.spr);
 		player.render(window.win);
 		window.win.display();
 	}

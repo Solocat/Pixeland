@@ -3,6 +3,8 @@
 #include <vector>
 #include "Spritesheet.h"
 #include "Animation.h"
+#include "Gamemap.h"
+#include "GameObject.h"
 //#include <SFML/Graphics.hpp>
 #include <map>
 
@@ -23,25 +25,15 @@ enum class AnimState
 	FALL
 };
 
-struct intVector
-{
-	int x;
-	int y;
-};
 
-struct doubleVector
-{
-	double x;
-	double y;
-};
 
-class Character
+class Character : protected GameObject
 {
 public:
 	Character();
 	void setSpritesheet(Spritesheet* sheet);
 	void setHitbox(unsigned w, unsigned h);
-	bool move(double deltaTime, const std::vector<bool>& map);	//returns: whether character's rectangle has moved
+	bool move(double deltaTime, const Gamemap& map);	//returns: whether character's rectangle has moved
 	void moveTo(double x, double y);
 	void jumpivate();
 	double scanDistance(double edge, const std::vector<bool>&, Direction direction, intVector firstTile, intVector lastTile);

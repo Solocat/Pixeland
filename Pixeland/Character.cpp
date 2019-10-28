@@ -41,7 +41,8 @@ void Character::setSpritesheet(Spritesheet* sheet)
 	sf::Sprite spr;
 	spr.setTexture(sheet->fullTex);
 	spr.setTextureRect(sheet->getRect(0));
-	spr.setOrigin(spr.getTextureRect().width / 2, spr.getTextureRect().height);
+	//spr.setOrigin(spr.getTextureRect().width / 2, spr.getTextureRect().height);
+	spr.setOrigin(1, 3);
 	sprite = spr;
 }
 
@@ -53,16 +54,18 @@ void Character::setHitbox(unsigned w, unsigned h)
 	origin.y = (double)h;
 }
 
-bool Character::move(double deltaTime, const std::vector<bool>& map)
+bool Character::move(double deltaTime, const Gamemap& map)
 {
 	bool moved = false;	//character has moved a whole pixel *clapclap*
 	////////////////Y_AXIS///////////////////////////
 	static double startHeight = position.y;
-	double downBound = scanBoundary(Direction::DOWN, map);
+	//double downBound = scanBoundary(Direction::DOWN, map);
+
+	int oldY = (int)position.y;
 
 	if (!airBorne)	//grounded
 	{
-		if (downBound > 0.0)	//fall through
+		if (!map.isPixelHard((int)position.x, (int)position.y + 1))	//fall through
 		{
 			airBorne = true;
 			freeFall = true;
@@ -99,15 +102,15 @@ bool Character::move(double deltaTime, const std::vector<bool>& map)
 		}
 
 
-		double upBound = scanBoundary(Direction::UP, map);
+		//double upBound = scanBoundary(Direction::UP, map);
 
 		double dist = targetPos - position.y;
 
-		if (dist < 0)
+		if (targetPos < position.y)
 		{	
-			if (-dist > upBound)	//hit ceiling
+			if (map.isPixelHard(int(position.x), (int)targetPos))	//hit ceiling
 			{
-				position.y -= upBound;
+				position.y = (int)targetPos + 1;
 				freeFall = true;
 				startHeight = position.y;
 				startJumpVector = 0.0;
@@ -123,9 +126,9 @@ bool Character::move(double deltaTime, const std::vector<bool>& map)
 		}
 		else
 		{
-			if (targetPos - position.y > downBound)	//landing
+			if (map.isPixelHard(int(position.x), (int)targetPos))	//landing
 			{
-				position.y += downBound;
+				position.y = (int)targetPos - 1;
 				airBorne = false;
 				freeFall = false;
 				startHeight = position.y;
@@ -142,41 +145,38 @@ bool Character::move(double deltaTime, const std::vector<bool>& map)
 		}
 		
 
-		if (hitbox.top != int(position.y - origin.y))
+		if (oldY != (int)position.y)
 		{
-			hitbox.top = int(position.y - origin.y);  //truncation is fine
 			moved = true;
 		}
-		
 	}
+
+
 
 	///////////////////////X-Axis//////////////////////////
 	int targetDist = 0;
-	if (velocity.x < 0.0)
+
+	if (velocity.x != 0.0)
 	{
-		//if (facingRight == true) sprite.setScale(-1.f, 1.f); //rotate sprite
-		facingRight = false;
-		position.x += fmax(velocity.x * deltaTime, -scanBoundary(Direction::LEFT, map));
-		if (hitbox.left != int(position.x - origin.x))
+		int oldX = (int)position.x;
+		position.x += velocity.x * deltaTime;
+		int newX = (int)position.x;
+
+		
+		if (map.isPixelHard(newX, (int)position.y)) //hit hard pixel
 		{
-			hitbox.left = int(position.x - origin.x);
-			moved = true;
+			if (!map.isPixelHard(newX, (int)position.y - 1)) //climb up
+			{
+				position.y = (int)position.y - 1;
+				moved = true;
+			}
+			else
+			{
+				position.x = newX = oldX;
+			}
 		}
-		if (currentState == AnimState::IDLE)
-		{
-			changeAnim(AnimState::MOVE);
-		}
-	}
-	else if (velocity.x > 0.0)
-	{
-		if (facingRight == false) sprite.setScale(1.f, 1.f);
-		facingRight = true;
-		position.x += fmin(velocity.x * deltaTime, scanBoundary(Direction::RIGHT, map));
-		if (hitbox.left != int(position.x - origin.x))
-		{
-			hitbox.left = int(position.x - origin.x);
-			moved = true;
-		}
+		else moved = true;
+
 		if (currentState == AnimState::IDLE)
 		{
 			changeAnim(AnimState::MOVE);
@@ -194,8 +194,8 @@ void Character::moveTo(double x, double y)
 {
 	position.x = x;
 	position.y = y;
-	hitbox.left = int(x - origin.x);
-	hitbox.top = int(y - origin.y);
+	hitbox.left = int(x);
+	hitbox.top = int(y);
 }
 
 void Character::jumpivate()
