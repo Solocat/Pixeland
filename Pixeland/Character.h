@@ -32,15 +32,10 @@ class Character : public PhysicsObject
 public:
 	Character();
 
-	void setHitbox(unsigned w, unsigned h);
 	bool move(double deltaTime, const Gamemap& map);
 	void jumpivate();
-	double scanDistance(double edge, const std::vector<bool>&, Direction direction, intVector firstTile, intVector lastTile);
-	double scanBoundary(Direction direction, const std::vector<bool>&);
 	void animate(double deltaTime);
 	void changeAnim(AnimState state);
-	void shoot();
-
 
 	std::map<AnimState, Animation> anims;
 	Animation *currentAnim;
@@ -54,7 +49,7 @@ public:
 	double airSpeed;
 	double jumpVelocity;
 	double jumpTimeMax;
-	double startJumpVector;
+	
 	
 	
 

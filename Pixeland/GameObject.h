@@ -38,17 +38,42 @@ class PhysicsObject : public GameObject
 {
 public:
 
-	void justmove(double deltaTime, const Gamemap& map)
+	void justmove(double deltaTime)
 	{
 		doubleVector newPos = position;
 		position.x += velocity.x * deltaTime;
 		position.y += velocity.y * deltaTime;
 	}
 
+	void launch(double veloX, double veloY)
+	{
+		velocity.x = veloX;
+		velocity.y = veloY;
+
+		Y0velocity = veloY;
+		fallT = 0.0;
+		H0height = position.y;
+	}
+
+	void inertiamove(double deltaTime)
+	{
+		position.x += velocity.x * deltaTime;
+
+		fallT += deltaTime;
+		position.y = H0height + Y0velocity * fallT + 0.5 * gravity * fallT * fallT;
+	}
+
+	double Y0velocity;
+	double fallT;
+	double H0height;
+
+	double startJumpVector;
 	doubleVector velocity;
 	double gravity;
 	double terminalVelocity;
 
 	bool airBorne;
 	bool freeFall;
+
+	double explosionRadius;
 };

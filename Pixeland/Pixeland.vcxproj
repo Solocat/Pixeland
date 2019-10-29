@@ -141,6 +141,7 @@
     <ClInclude Include="Character.h" />
     <ClInclude Include="Gamemap.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="Gun.h" />
     <ClInclude Include="Spritesheet.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>

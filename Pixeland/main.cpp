@@ -1,6 +1,8 @@
 #include <SFML/Graphics.hpp>
 #include "Character.h"
+#include "Gun.h"
 #include <vector>
+#include <list>
 
 int main()
 {
@@ -15,7 +17,6 @@ int main()
 	player.jumpVelocity = 22 * 8;
 	player.jumpTimeMax = 0.14;
 	player.terminalVelocity = 22 * 8;
-	player.setHitbox(1, 1);
 
 	Spritesheet playerSprites("soldier.png", 3, 4, true);
 	player.setSpritesheet(&playerSprites);
@@ -30,7 +31,23 @@ int main()
 	player.moveTo(200, 200);
 
 	Spritesheet bulletSprites("redpixel.png", 1, 1, false);
-	vector<PhysicsObject> projectiles;
+	list<PhysicsObject> projectiles;
+
+	PhysicsObject bullet;
+	bullet.gravity = 500.0;
+	bullet.explosionRadius = 5.0;
+	bullet.setSpritesheet(&bulletSprites);
+	Gun magnum;
+	magnum.shootInterval = 0.5;
+	magnum.bulletBase = &bullet;
+
+	PhysicsObject slime;
+	slime.gravity = 500.0;
+	slime.explosionRadius = 1.0;
+	slime.setSpritesheet(&bulletSprites);
+	Gun slimer;
+	slimer.shootInterval = 0.01;
+	slimer.bulletBase = &slime;
 
 	sf::Clock clock;
 	bool quit = false;
@@ -40,6 +57,7 @@ int main()
 	{
 		sf::Time frameTime = clock.restart();
 		if (frameTime.asMilliseconds() > 100) frameTime = sf::milliseconds(100);	//at low framerates game becomes fps dependent to avoid collision errors etc.
+
 		//event block
 		sf::Event e;
 		while (window.win.pollEvent(e))
@@ -94,21 +112,41 @@ int main()
 				break;
 			}
 			case sf::Event::MouseButtonPressed: 
+			{	
+				break;
+			}
+			case sf::Event::MouseButtonReleased:
 			{
-				sf::Vector2i pointA = window.win.mapCoordsToPixel(player.sprite.getPosition());
-				sf::Vector2i pointB = sf::Mouse::getPosition(window.win);
-				
-
-				PhysicsObject bullet;
-				bullet.setSpritesheet(&bulletSprites);
-				bullet.position = player.position;
-				bullet.velocity.x = pointB.x - pointA.x;
-				bullet.velocity.y = pointB.y - pointA.y;
-				bullet.gravity = 500.0;
-				projectiles.push_back(bullet);
+				magnum.triggerHeld = false;
+				slimer.triggerHeld = false;
 				break;
 			}
 			default: break;
+			}
+		}
+
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+		{
+			sf::Vector2i pointA = window.win.mapCoordsToPixel(player.sprite.getPosition());
+			sf::Vector2i pointB = sf::Mouse::getPosition(window.win);
+
+			vector<PhysicsObject> bullets = magnum.shoot(player.position, { double(pointB.x - pointA.x), double(pointB.y - pointA.y) }, frameTime.asSeconds());
+
+			for (auto& i : bullets)
+			{
+				projectiles.push_back(i);
+			}		
+		}
+		else if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
+		{
+			sf::Vector2i pointA = window.win.mapCoordsToPixel(player.sprite.getPosition());
+			sf::Vector2i pointB = sf::Mouse::getPosition(window.win);
+
+			vector<PhysicsObject> bullets = slimer.shoot(player.position, { double(pointB.x - pointA.x), double(pointB.y - pointA.y) }, frameTime.asSeconds());
+
+			for (auto& i : bullets)
+			{
+				projectiles.push_back(i);
 			}
 		}
 
@@ -131,20 +169,27 @@ int main()
 		}
 		player.animate(frameTime.asSeconds());
 
-		
-		for (auto& i : projectiles)
+		vector<list<PhysicsObject>::iterator> deletions;
+		for (auto i = projectiles.begin(); i != projectiles.end(); i++)
 		{
-			if (abs(i.velocity.x) < 0.1) continue;
-
-			i.justmove(frameTime.asSeconds(), map);
-			i.velocity.y += frameTime.asSeconds() * i.gravity;
-			if (map.checkCollision(i.position.x, i.position.y))
+			i->inertiamove(frameTime.asSeconds());
+			i->velocity.y += frameTime.asSeconds() * i->gravity;
+			if (map.checkCollision(i->position.x, i->position.y))
 			{
-				i.velocity.x = 0.0;
-				i.velocity.y = 0.0;
-				map.circleExplosion(i.position.x, i.position.y, 5.0);
+				if (i->explosionRadius <= 1.0)
+				{
+					map.pixelExplosion(i->position.x, i->position.y);
+				}
+				else map.circleExplosion(i->position.x, i->position.y, i->explosionRadius);
+				
+				deletions.push_back(i);
 			}
 		}
+		for (auto& i : deletions)
+		{
+			projectiles.erase(i);
+		}
+		deletions.clear();
 
 		//render block
 		window.win.clear();
@@ -153,7 +198,6 @@ int main()
 
 		for (auto& i : projectiles)
 		{
-			if (abs(i.velocity.x) < 0.1) continue;
 			i.render(window.win);
 		}
 
