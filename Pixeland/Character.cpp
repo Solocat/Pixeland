@@ -35,16 +35,7 @@ Character::Character()
 	sprites = nullptr;
 }
 
-void Character::setSpritesheet(Spritesheet* sheet)
-{
-	sprites = sheet;
-	sf::Sprite spr;
-	spr.setTexture(sheet->fullTex);
-	spr.setTextureRect(sheet->getRect(0));
-	//spr.setOrigin(spr.getTextureRect().width / 2, spr.getTextureRect().height);
-	spr.setOrigin(1, 3);
-	sprite = spr;
-}
+
 
 void Character::setHitbox(unsigned w, unsigned h)
 {
@@ -190,14 +181,6 @@ bool Character::move(double deltaTime, const Gamemap& map)
 	return moved;
 }
 
-void Character::moveTo(double x, double y)
-{
-	position.x = x;
-	position.y = y;
-	hitbox.left = int(x);
-	hitbox.top = int(y);
-}
-
 void Character::jumpivate()
 {
 	airBorne = true;
@@ -311,11 +294,6 @@ double Character::scanBoundary(Direction direction, const std::vector<bool>& map
 	return scanDistance(edge, map, direction, tile1, tile2);
 }
 
-void Character::render(sf::RenderWindow& window)
-{
-	sprite.setPosition((int)position.x, (int)position.y);
-	window.draw(sprite);
-}
 
 void Character::animate(double deltaTime)
 {
