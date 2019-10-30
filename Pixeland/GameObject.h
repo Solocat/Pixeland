@@ -25,6 +25,7 @@ public:
 	void moveTo(double x, double y);
 	sf::Sprite sprite;
 	Spritesheet* sprites;
+	sf::Drawable* drawing;
 	bool facingRight;
 
 	doubleVector position; //world position. sprite's position must be int
@@ -76,4 +77,5 @@ public:
 	bool freeFall;
 
 	double explosionRadius;
+
 };

@@ -2,7 +2,8 @@
 
 void GameObject::render(sf::RenderWindow& window)
 {
-	sprite.setPosition((int)position.x, (int)position.y);
+	//sprite.setPosition((int)position.x, (int)position.y);
+	sprite.setPosition(position.x, position.y);
 	window.draw(sprite);
 }
 

@@ -14,17 +14,17 @@ Window::Window(string _title, int _width, int _height, int fps)
 	camera = win.getDefaultView();
 }
 
-void Window::follow(int x, int y, sf::Vector2i bounds, unsigned margin) //player is offcenter
+void Window::follow(double x, double y, sf::Vector2i bounds, unsigned margin) //player is offcenter
 {
 	sf::Vector2i size = (sf::Vector2i)camera.getSize();
-	sf::Vector2i center = (sf::Vector2i)camera.getCenter();
+	sf::Vector2f center = camera.getCenter();
 
 	sf::Vector2i halfSize = size / 2;
 
-	int xMin = x - margin;
-	int xMax = x + margin;
-	int yMin = y - margin;
-	int yMax = y + margin;
+	double xMin = x - margin;
+	double xMax = x + margin;
+	double yMin = y - margin;
+	double yMax = y + margin;
 	int xMaxMax = bounds.x - halfSize.x;
 	int yMaxMax = bounds.y - halfSize.y;
 	
@@ -50,7 +50,7 @@ void Window::follow(int x, int y, sf::Vector2i bounds, unsigned margin) //player
 	if (center.y < halfSize.y) center.y = halfSize.y;
 	else if (center.y > yMaxMax) center.y = yMaxMax;
 
-	camera.setCenter(sf::Vector2f(center));
+	camera.setCenter(center);
 	win.setView(camera);
 }
 

@@ -52,15 +52,20 @@ public:
 		return isPixelHard((unsigned)x, (unsigned)y);
 	}
 
-	void destroyPixel(unsigned x, unsigned y)
+	void changePixel(unsigned x, unsigned y, sf::Color color)
 	{
 		if (!isInRange(x, y)) return;
 
-		hardMask[size.x * y + x] = false;
-		img.setPixel(x, y, sf::Color(0,0,0,0));
+		if (color == sf::Color::Magenta || color == sf::Color::Transparent)
+		{
+			hardMask[size.x * y + x] = false;
+		}
+		else hardMask[size.x * y + x] = true;
+		
+		img.setPixel(x, y, color);
 	}
 
-	void circleExplosion(double x, double y, double r)
+	void circleExplosion(double x, double y, double r, sf::Color color)
 	{
 		sf::IntRect bounds;
 		int leftBound = max(int(x - r+1), 0);
@@ -77,7 +82,7 @@ public:
 				);
 				if (dist <= r)
 				{				
-					destroyPixel(i, j);				
+					changePixel(i, j, color);
 				}
 			}
 		}
@@ -91,7 +96,7 @@ public:
 
 	void pixelExplosion(int x, int y)
 	{
-		destroyPixel(x, y);
+		changePixel(x, y, sf::Color::Transparent);
 
 		tex.update(img.getPixelsPtr());
 	}

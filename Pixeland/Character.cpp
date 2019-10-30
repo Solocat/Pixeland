@@ -37,6 +37,8 @@ Character::Character()
 
 bool Character::move(double deltaTime, const Gamemap& map)
 {
+	if (map.checkCollision(position.x, position.y)) return false; //player is stuck
+
 	bool moved = false;	//character has moved a whole pixel *clapclap*
 	////////////////Y_AXIS///////////////////////////
 	static double startHeight = position.y;
@@ -164,6 +166,7 @@ bool Character::move(double deltaTime, const Gamemap& map)
 		changeAnim(AnimState::IDLE);
 	}
 
+	moved = true;
 	return moved;
 }
 

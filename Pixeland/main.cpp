@@ -12,11 +12,11 @@ int main()
 	Gamemap map("dirtmap.png");
 
 	Character player;
-	player.gravity = 1500.0;
+	player.gravity = 500.0;
 	player.runSpeed = 10 * 8;
-	player.jumpVelocity = 22 * 8;
+	player.jumpVelocity = 16 * 8;
 	player.jumpTimeMax = 0.14;
-	player.terminalVelocity = 22 * 8;
+	player.terminalVelocity = 16 * 8;
 
 	Spritesheet playerSprites("soldier.png", 3, 4, true);
 	player.setSpritesheet(&playerSprites);
@@ -125,29 +125,23 @@ int main()
 			}
 		}
 
-		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+		bool left = sf::Mouse::isButtonPressed(sf::Mouse::Left);
+		bool right = sf::Mouse::isButtonPressed(sf::Mouse::Right);
+		if (left || right)
 		{
 			sf::Vector2i pointA = window.win.mapCoordsToPixel(player.sprite.getPosition());
 			sf::Vector2i pointB = sf::Mouse::getPosition(window.win);
 
-			vector<PhysicsObject> bullets = magnum.shoot(player.position, { double(pointB.x - pointA.x), double(pointB.y - pointA.y) }, frameTime.asSeconds());
+			doubleVector velo = { double(pointB.x - pointA.x), double(pointB.y - pointA.y) };
+
+			vector<PhysicsObject> bullets;
+			if (left) bullets = magnum.shoot(player.position, velo, frameTime.asSeconds());
+			else bullets = slimer.shoot(player.position, velo, frameTime.asSeconds());
 
 			for (auto& i : bullets)
 			{
 				projectiles.push_back(i);
 			}		
-		}
-		else if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
-		{
-			sf::Vector2i pointA = window.win.mapCoordsToPixel(player.sprite.getPosition());
-			sf::Vector2i pointB = sf::Mouse::getPosition(window.win);
-
-			vector<PhysicsObject> bullets = slimer.shoot(player.position, { double(pointB.x - pointA.x), double(pointB.y - pointA.y) }, frameTime.asSeconds());
-
-			for (auto& i : bullets)
-			{
-				projectiles.push_back(i);
-			}
 		}
 
 		//movement block
@@ -165,7 +159,7 @@ int main()
 
 		if (player.move(frameTime.asSeconds(), map))
 		{
-			window.follow((int)player.position.x, (int)player.position.y, sf::Vector2i(map.size), 4*8);
+			window.follow(player.position.x, player.position.y, sf::Vector2i(map.size), 4*8);
 		}
 		player.animate(frameTime.asSeconds());
 
@@ -180,7 +174,7 @@ int main()
 				{
 					map.pixelExplosion(i->position.x, i->position.y);
 				}
-				else map.circleExplosion(i->position.x, i->position.y, i->explosionRadius);
+				else map.circleExplosion(i->position.x, i->position.y, i->explosionRadius, sf::Color::Green);
 				
 				deletions.push_back(i);
 			}

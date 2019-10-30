@@ -10,7 +10,7 @@ class Window
 {
 public:
 	Window(string _title, int _width, int _height, int fps);
-	void follow(int x, int y, sf::Vector2i bounds, unsigned margin);
+	void follow(double x, double y, sf::Vector2i bounds, unsigned margin);
 
 	sf::IntRect getArea() const;
 
