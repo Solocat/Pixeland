@@ -27,7 +27,7 @@ enum class AnimState
 
 
 
-class Character : public PhysicsObject
+class Character : public KineticObject
 {
 public:
 	Character();

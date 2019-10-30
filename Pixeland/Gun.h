@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+#include "Gamemap.h"
 
 class Gun
 {
@@ -12,7 +13,7 @@ public:
 		triggerHeld = false;
 	}
 
-	vector<PhysicsObject> shoot(doubleVector pos, doubleVector velo, double deltaTime) {
+	vector<KineticObject> shoot(doubleVector pos, doubleVector velo, double deltaTime, Gamemap& map) {
 
 		if (!triggerHeld) 
 		{ 
@@ -22,16 +23,16 @@ public:
 
 		timeSinceShot += deltaTime;
 
-		vector<PhysicsObject> bullets;
+		vector<KineticObject> bullets;
 
 		while (timeSinceShot >= shootInterval)
 		{
 			timeSinceShot -= shootInterval;
 
-			PhysicsObject bullet = *bulletBase;
+			KineticObject bullet = *bulletBase;
 			bullet.position = pos;
 			bullet.launch(velo.x, velo.y);
-			bullet.inertiamove(timeSinceShot);
+			bullet.inertiamove(timeSinceShot, map);
 
 			bullets.push_back(bullet);
 		}
@@ -46,6 +47,6 @@ public:
 	bool triggerHeld;
 
 
-	const PhysicsObject* bulletBase;
+	const KineticObject* bulletBase;
 
 };

@@ -94,9 +94,9 @@ public:
 		tex.update(img.getPixelsPtr());
 	}
 
-	void pixelExplosion(int x, int y)
+	void pixelExplosion(int x, int y, sf::Color color)
 	{
-		changePixel(x, y, sf::Color::Transparent);
+		changePixel(x, y, color);
 
 		tex.update(img.getPixelsPtr());
 	}

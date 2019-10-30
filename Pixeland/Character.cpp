@@ -20,8 +20,8 @@ Character::Character()
 	jumpVelocity = 0.0;
 	startJumpVector = 0.0;
 	terminalVelocity = 0.0;
-	//position.x = 0.0;
-	//position.y = 0.0;
+	position.x = 0.0;
+	position.y = 0.0;
 	origin.x = 0.0;
 	origin.y = 0.0;
 	hitbox.left = 0;
@@ -37,7 +37,12 @@ Character::Character()
 
 bool Character::move(double deltaTime, const Gamemap& map)
 {
-	if (map.checkCollision(position.x, position.y)) return false; //player is stuck
+	if (map.checkCollision(position.x, position.y)) //player is stuck
+	{
+		freeFall = false;
+		airBorne = false;
+		return false;
+	}
 
 	bool moved = false;	//character has moved a whole pixel *clapclap*
 	////////////////Y_AXIS///////////////////////////
