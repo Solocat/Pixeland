@@ -59,26 +59,30 @@ public:
 	bool inertiamove(double deltaTime, Gamemap& map)
 	{
 		bool collision = false;
-		doubleVector newpos;
-
 		
 
+		if (map.checkCollision(position.x, position.y))
+		{
+			crashPixel = {(int) position.x, (int)position.y };
+			return true;
+		}
+
+		doubleVector newpos;
 		newpos.x = position.x + velocity.x * deltaTime;
 
 		fallT += deltaTime;
 		newpos.y = H0height + Y0velocity * fallT + 0.5 * gravity * fallT * fallT;
 
-		sf::Vector2i crashpos{ (int)newpos.x, (int)newpos.y };
-
 		//move pixel by pixel
 		if (newpos.y > position.y)
 		{
-			for (int y = (int)position.y; y < (int)newpos.y; y++) 
+			for (int y = (int)position.y; y <= (int)newpos.y; y++) 
 			{
-				if (map.isPixelHard((int)position.x, y+1))
+				if (map.isPixelHard((int)position.x, y))
 				{
-					newpos.y = y;
-					crashpos.y = (int)y + 1;
+					newpos.y = y-1;	
+					crashPixel.y = y;
+					crashPixel.x = newpos.x = position.x;
 					collision = true;
 					break;
 				}
@@ -86,47 +90,51 @@ public:
 		}
 		else
 		{
-			for (int y = (int)position.y; y > (int)newpos.y; y--)
+			for (int y = (int)position.y; y >= (int)newpos.y; y--)
 			{
-				if (map.isPixelHard((int)position.x, y-1))
+				if (map.isPixelHard((int)position.x, y))
 				{
-					newpos.y = y;
-					crashpos.y = (int)y - 1;
+					newpos.y = y+1;
+					crashPixel.y = y;
+					crashPixel.x = newpos.x = position.x;
 					collision = true;	
 					break;
 				}
 			}
 		}
 
-		if (newpos.x > position.x)
+		if (!collision)
 		{
-			for (int x = (int)position.x; x < (int)newpos.x; x++)
+			crashPixel.y = newpos.y;
+			if (newpos.x > position.x)
 			{
-				if (map.isPixelHard(x+1, (int)position.y))
+				for (int x = (int)position.x; x <= (int)newpos.x; x++)
 				{
-					newpos.x = x;
-					collision = true;
-					crashpos.x = (int)x + 1;
-					break;
+					if (map.isPixelHard(x, (int)newpos.y))
+					{
+						newpos.x = x - 1;
+						crashPixel.x = x;
+						collision = true;
+						break;
+					}
 				}
 			}
-		}
-		else
-		{
-			for (int x = (int)position.x; x > (int)newpos.x; x--)
+			else
 			{
-				if (map.isPixelHard(x-1, (int)position.y))
+				for (int x = (int)position.x; x >= (int)newpos.x; x--)
 				{
-					newpos.x = x;
-					collision = true;
-					crashpos.x = (int)x - 1;
-					break;
+					if (map.isPixelHard(x, (int)newpos.y))
+					{
+						newpos.x = x + 1;
+						crashPixel.x = x;
+						collision = true;
+						break;
+					}
 				}
 			}
 		}
 
 		position = newpos;
-		crashPixel = crashpos;
 
 		return collision;
 	}

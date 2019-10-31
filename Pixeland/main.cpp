@@ -21,6 +21,7 @@ int main()
 	Spritesheet playerSprites("soldier.png", 3, 4, true);
 	player.setSpritesheet(&playerSprites);
 	player.sprite.setOrigin(1, 3);
+	player.bulletOrigin = sf::Vector2i(0, -2);
 
 	player.anims[AnimState::IDLE] = Animation(0, 0, 0.0);
 	player.anims[AnimState::MOVE] = Animation(0, 0, 0.01875);
@@ -150,7 +151,7 @@ int main()
 			doubleVector velo = { double(pointB.x - pointA.x), double(pointB.y - pointA.y) };
 
 			vector<KineticObject> bullets;
-			bullets = currentGun->shoot(player.position, velo, frameTime.asSeconds(), map);
+			bullets = currentGun->shoot(player.bulletPosition(), velo, frameTime.asSeconds(), map);
 
 			for (auto& i : bullets)
 			{

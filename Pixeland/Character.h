@@ -37,6 +37,14 @@ public:
 	void animate(double deltaTime);
 	void changeAnim(AnimState state);
 
+	doubleVector bulletPosition()
+	{
+		return 	doubleVector{ 
+			position.x + bulletOrigin.x,
+			position.y + bulletOrigin.y
+		};
+	}
+
 	std::map<AnimState, Animation> anims;
 	Animation *currentAnim;
 	AnimState currentState;
@@ -55,5 +63,5 @@ public:
 
 	sf::IntRect hitbox;
 
-	
+	sf::Vector2i bulletOrigin;
 };
