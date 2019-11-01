@@ -72,7 +72,26 @@ public:
 
 		//move pixel by pixel
 
-		int increment = 0;
+		doubleVector pos = pixelMarch(position, (int)newpos.y, true, map);
+		if (pos.x != -1)
+		{
+			position = pos;
+			return true;
+		}
+		else
+		{
+			position.y = newpos.y;
+			pos = pixelMarch(position, (int)newpos.x, false, map);
+			if (pos.x != -1)
+			{
+				position = pos;
+				return true;
+			}
+			else position.x = newpos.x;
+		}
+		return false;
+
+		/*int increment = 0;
 		int dist = (int)newpos.y - (int)position.y;
 		if (dist > 0) increment = 1;
 		else if (dist < 0) increment = -1;
@@ -112,13 +131,13 @@ public:
 					return true;
 				}
 			}
-		}
+		}*/
 
-		position = newpos;
-		return false;
+		//position = newpos;
+		//return false;
 	}
 
-	doubleVector pixelMarch(doubleVector start, int goal, bool vertical, Gamemap& map)
+	doubleVector pixelMarch(doubleVector start, int goal, bool vertical, Gamemap& map) //return last position before crash, or -1
 	{
 		int increment = 0;
 		int dist = goal;
