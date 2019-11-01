@@ -11,9 +11,10 @@ public:
 		shootInterval = 1.0;
 		timeSinceShot = 0.0;
 		triggerHeld = false;
+		bulletBase = nullptr;
 	}
 
-	vector<KineticObject> shoot(doubleVector pos, doubleVector velo, double deltaTime, Gamemap& map) {
+	vector<Projectile> shoot(doubleVector pos, doubleVector velo, double deltaTime, Gamemap& map) {
 
 		if (!triggerHeld) 
 		{ 
@@ -23,13 +24,14 @@ public:
 
 		timeSinceShot += deltaTime;
 
-		vector<KineticObject> bullets;
+		vector<Projectile> bullets;
 
 		while (timeSinceShot >= shootInterval)
 		{
 			timeSinceShot -= shootInterval;
 
-			KineticObject bullet = *bulletBase;
+			Projectile bullet = *bulletBase;
+			//bullet.gun = this;
 			bullet.position = pos;
 			bullet.launch(velo.x, velo.y);
 			bullet.inertiamove(timeSinceShot, map);
@@ -47,6 +49,6 @@ public:
 	bool triggerHeld;
 
 
-	const KineticObject* bulletBase;
+	const Projectile* bulletBase;
 
 };

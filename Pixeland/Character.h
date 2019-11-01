@@ -51,16 +51,10 @@ public:
 	unsigned currentFrame;
 	double frameCounter;
 	
-
-	
 	double runSpeed;
-	double airSpeed;
 	double jumpVelocity;
 	double jumpTimeMax;
 	
-	
-	
-
 	sf::IntRect hitbox;
 
 	sf::Vector2i bulletOrigin;

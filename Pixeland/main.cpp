@@ -33,20 +33,28 @@ int main()
 
 	Spritesheet bulletSprites("redpixel.png", 1, 1, false);
 	Spritesheet greenPix("greenpixel.png", 1, 1, false);
-	list<KineticObject> projectiles;
+	list<Projectile> projectiles;
 
-	KineticObject bullet;
+	sf::RectangleShape redpix;
+	redpix.setSize({ 1, 1 });
+	redpix.setFillColor(sf::Color::Red);
+
+	Projectile bullet;
 	bullet.gravity = 500.0;
 	bullet.explosionRadius = 5.0;
-	bullet.setSpritesheet(&bulletSprites);
+	//bullet.setSpritesheet(&bulletSprites);
+	bullet.drawing = &redpix;
 	Gun magnum;
 	magnum.shootInterval = 0.5;
 	magnum.bulletBase = &bullet;
 
-	KineticObject slime;
+
+
+	Projectile slime;
 	slime.gravity = 500.0;
 	slime.explosionRadius = 1.0;
-	slime.setSpritesheet(&bulletSprites);
+	//slime.setSpritesheet(&bulletSprites);
+	slime.drawing = &redpix;
 	Gun slimer;
 	slimer.shootInterval = 0.01;
 	slimer.bulletBase = &slime;
@@ -56,11 +64,14 @@ int main()
 	sf::Clock clock;
 	bool quit = false;
 
+	double timeFactor = 1.0;
 
 	while (!quit)
 	{
 		sf::Time frameTime = clock.restart();
-		if (frameTime.asMilliseconds() > 100) frameTime = sf::milliseconds(100);	//at low framerates game becomes fps dependent to avoid collision errors etc.
+		frameTime = sf::microseconds(frameTime.asMicroseconds() * timeFactor);
+		//cout << frameTime.asMilliseconds() << endl;
+		//if (frameTime.asMilliseconds() > 100) frameTime = sf::milliseconds(100);	//at low framerates game becomes fps dependent to avoid collision errors etc.
 
 		//event block
 		sf::Event e;
@@ -150,7 +161,7 @@ int main()
 
 			doubleVector velo = { double(pointB.x - pointA.x), double(pointB.y - pointA.y) };
 
-			vector<KineticObject> bullets;
+			vector<Projectile> bullets;
 			bullets = currentGun->shoot(player.bulletPosition(), velo, frameTime.asSeconds(), map);
 
 			for (auto& i : bullets)
@@ -179,7 +190,7 @@ int main()
 		}
 		player.animate(frameTime.asSeconds());
 
-		vector<list<KineticObject>::iterator> deletions;
+		vector<list<Projectile>::iterator> deletions;
 		for (auto i = projectiles.begin(); i != projectiles.end(); i++)
 		{
 			bool hit = i->inertiamove(frameTime.asSeconds(), map);
@@ -190,7 +201,7 @@ int main()
 				if (i->creative) color = sf::Color::Green;
 
 				if (currentGun == &magnum) map.circleExplosion(i->position.x, i->position.y, i->explosionRadius, color);
-				else if (color == sf::Color::Green) map.pixelExplosion(i->position.x, i->position.y, color);
+				else if (color == sf::Color::Green) map.pixelExplosion((int)i->position.x, (int)i->position.y, color);
 				else map.pixelExplosion(i->crashPixel.x, i->crashPixel.y, color);
 				
 				

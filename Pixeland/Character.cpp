@@ -30,7 +30,6 @@ Character::Character()
 	hitbox.height = 0;
 	airBorne = false;
 	freeFall = false;
-	airSpeed = 0.0;
 	jumpTimeMax = 0.0;
 	sprites = nullptr;
 }

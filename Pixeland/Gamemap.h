@@ -31,7 +31,7 @@ public:
 
 	bool isInRange(int x, int y) const
 	{
-		if (x < 0.0 || y < 0.0 || x >= size.x || y >= size.y)
+		if (x < 0.0 || y < 0.0 || x >= (int)size.x || y >= (int)size.y)
 		{
 			return false;
 		}
@@ -47,7 +47,7 @@ public:
 
 	bool checkCollision(double x, double y) const
 	{
-		if (!isInRange(x, y)) return true;
+		if (!isInRange((int)x, (int)y)) return true;
 
 		return isPixelHard((unsigned)x, (unsigned)y);
 	}
