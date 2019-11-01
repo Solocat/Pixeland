@@ -58,9 +58,6 @@ public:
 
 	bool inertiamove(double deltaTime, Gamemap& map)
 	{
-		bool collision = false;
-		
-
 		if (map.checkCollision(position.x, position.y))
 		{
 			crashPixel = {(int) position.x, (int)position.y };
@@ -74,69 +71,87 @@ public:
 		newpos.y = H0height + Y0velocity * fallT + 0.5 * gravity * fallT * fallT;
 
 		//move pixel by pixel
-		if (newpos.y > position.y)
-		{
-			for (int y = (int)position.y; y <= (int)newpos.y; y++) 
-			{
-				if (map.isPixelHard((int)position.x, y))
-				{
-					newpos.y = y-1;	
-					crashPixel.y = y;
-					crashPixel.x = newpos.x = position.x;
-					collision = true;
-					break;
-				}
-			}
-		}
-		else
-		{
-			for (int y = (int)position.y; y >= (int)newpos.y; y--)
-			{
-				if (map.isPixelHard((int)position.x, y))
-				{
-					newpos.y = y+1;
-					crashPixel.y = y;
-					crashPixel.x = newpos.x = position.x;
-					collision = true;	
-					break;
-				}
-			}
-		}
 
-		if (!collision)
+		int increment = 0;
+		int dist = (int)newpos.y - (int)position.y;
+		if (dist > 0) increment = 1;
+		else if (dist < 0) increment = -1;
+
+		if (dist != 0)
 		{
-			crashPixel.y = newpos.y;
-			if (newpos.x > position.x)
+			for (int y = 1; y <= abs(dist); y++)
 			{
-				for (int x = (int)position.x; x <= (int)newpos.x; x++)
+				if (map.isPixelHard((int)position.x, (int)position.y + increment*y))
 				{
-					if (map.isPixelHard(x, (int)newpos.y))
-					{
-						newpos.x = x - 1;
-						crashPixel.x = x;
-						collision = true;
-						break;
-					}
+					newpos.y = (int)position.y + increment * (y-1);
+					crashPixel.y = (int)position.y + increment * y;
+					crashPixel.x = newpos.x = position.x;
+					position = newpos;
+					return true;
 				}
 			}
-			else
+		}
+		
+
+		increment = 0;
+		dist = (int)newpos.x - (int)position.x;
+		if (dist > 0) increment = 1;
+		else if (dist < 0) increment = -1;
+
+
+		if (dist != 0)
+		{
+			for (int x = 1; x <= abs(dist); x++)
 			{
-				for (int x = (int)position.x; x >= (int)newpos.x; x--)
+				if (map.isPixelHard((int)position.x + increment*x, (int)newpos.y))
 				{
-					if (map.isPixelHard(x, (int)newpos.y))
-					{
-						newpos.x = x + 1;
-						crashPixel.x = x;
-						collision = true;
-						break;
-					}
+					newpos.x = (int)position.x + increment * (x-1);
+					crashPixel.x = (int)position.x + increment * x;
+					crashPixel.y = newpos.y;
+					position = newpos;
+					return true;
 				}
 			}
 		}
 
 		position = newpos;
+		return false;
+	}
 
-		return collision;
+	doubleVector pixelMarch(doubleVector start, int goal, bool vertical, Gamemap& map)
+	{
+		int increment = 0;
+		int dist = goal;
+
+		if (vertical) dist -= (int)start.y;
+		else dist -= (int)start.x;
+
+		if (dist > 0) increment = 1;
+		else if (dist < 0) increment = -1;
+
+		if (dist != 0)
+		{
+			for (int i = 1; i <= abs(dist); i++)
+			{
+				double x = start.x;
+				double y = start.y;
+
+				if (vertical) y += increment * i;
+				else x += increment * i;
+
+				if (map.isPixelHard((int)x, (int)y))
+				{
+					crashPixel.x = (int)x;
+					crashPixel.y = (int)y;
+
+					if (vertical) y = (int)y - increment;
+					else x = (int)x - increment;
+
+					return doubleVector{x,y};
+				}
+			}
+		}
+		return doubleVector{ -1, -1 };
 	}
 
 	double Y0velocity;
