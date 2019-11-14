@@ -32,7 +32,7 @@ class Character : public KineticObject
 public:
 	Character();
 
-	bool move(double deltaTime, const Gamemap& map);
+	bool move(double deltaTime, Gamemap& map);
 	void jumpivate();
 	void animate(double deltaTime);
 	void changeAnim(AnimState state);

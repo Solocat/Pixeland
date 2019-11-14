@@ -18,7 +18,6 @@ Character::Character()
 	gravity = 0.0;
 	runSpeed = 0.0;
 	jumpVelocity = 0.0;
-	startJumpVector = 0.0;
 	terminalVelocity = 0.0;
 	position.x = 0.0;
 	position.y = 0.0;
@@ -34,21 +33,18 @@ Character::Character()
 	sprites = nullptr;
 }
 
-bool Character::move(double deltaTime, const Gamemap& map)
+bool Character::move(double deltaTime, Gamemap& map)
 {
-	if (map.checkCollision(position.x, position.y)) //player is stuck
+	if (map.checkCollision(position.x, position.y)) //player is stuck. This shouldn't happen.
 	{
+		cout << "Player is stuck!";
 		freeFall = false;
 		airBorne = false;
 		return false;
 	}
 
-	bool moved = false;	//character has moved a whole pixel *clapclap*
 	////////////////Y_AXIS///////////////////////////
 	static double startHeight = position.y;
-	//double downBound = scanBoundary(Direction::DOWN, map);
-
-	int oldY = (int)position.y;
 
 	if (!airBorne)	//grounded
 	{
@@ -62,7 +58,7 @@ bool Character::move(double deltaTime, const Gamemap& map)
 
 	if (airBorne)	//airborne
 	{
-		double targetPos;
+		double target;
 		static double airTime = 0.0;
 		static double fallTime = 0.0;
 
@@ -74,91 +70,71 @@ bool Character::move(double deltaTime, const Gamemap& map)
 				freeFall = true;
 				deltaTime = airTime - jumpTimeMax;	//freefall for the remaining time
 			}
-			else targetPos = startHeight - jumpVelocity*airTime;
+			else target = startHeight - jumpVelocity*airTime;
 		}
 
 		if (freeFall)	//freefall
 		{
 			fallTime += deltaTime;
-			targetPos = startHeight - startJumpVector*airTime + 0.5*gravity*fallTime*fallTime;
+			target = startHeight - startVelocityY *airTime + 0.5*gravity*fallTime*fallTime;
 
-			if (targetPos - position.y > terminalVelocity*deltaTime)	//terminal velocity
+			if (target - position.y > terminalVelocity*deltaTime)	//terminal velocity
 			{
-				targetPos = position.y + terminalVelocity*deltaTime;
+				target = position.y + terminalVelocity*deltaTime;
 			}
 		}
 
-		double dist = targetPos - position.y;
+		doubleVector pos = pixelMarch(position, target, true, map);
 
-		if (targetPos < position.y)
-		{	
-			if (map.isPixelHard(int(position.x), (int)targetPos))	//hit ceiling
+		if (pos.x != -1) //collision
+		{
+			position.y = pos.y;
+			startHeight = position.y;
+			startVelocityY = 0.0;
+			airTime = 0.0;
+			fallTime = 0.0;
+
+			if (target < position.y) //hit ceiling
 			{
-				position.y = (int)targetPos + 1;
 				freeFall = true;
-				startHeight = position.y;
-				startJumpVector = 0.0;
-				airTime = 0.0;
-				fallTime = 0.0;
 				changeAnim(AnimState::FALL);
 			}
-			else
+			else //landing
 			{
-				position.y = targetPos;
-				changeAnim(AnimState::JUMP);
+				airBorne = false;
+				freeFall = false;
+				changeAnim(AnimState::IDLE);
 			}
 		}
 		else
 		{
-			if (map.isPixelHard(int(position.x), (int)targetPos))	//landing
-			{
-				position.y = (int)targetPos - 1;
-				airBorne = false;
-				freeFall = false;
-				startHeight = position.y;
-				startJumpVector = 0.0;
-				airTime = 0.0;
-				fallTime = 0.0;
-				changeAnim(AnimState::IDLE);
-			}
-			else
-			{
-				position.y = targetPos;
-				changeAnim(AnimState::FALL);
-			}
-		}
-		
-
-		if (oldY != (int)position.y)
-		{
-			moved = true;
+			position.y = target;
 		}
 	}
 
 
 	///////////////////////X-Axis//////////////////////////
-	int targetDist = 0;
 
 	if (velocity.x != 0.0)
 	{
-		int oldX = (int)position.x;
-		position.x += velocity.x * deltaTime;
-		int newX = (int)position.x;
-
+		double target;
+		target = position.x + velocity.x * deltaTime;
 		
-		if (map.isPixelHard(newX, (int)position.y)) //hit hard pixel
+		doubleVector pos = pixelMarch(position, target, false, map);
+
+		if (pos.x != -1) //hit hard pixel
 		{
-			if (!map.isPixelHard(newX, (int)position.y - 1)) //climb up
+			if (!map.isPixelHard(target, (int)position.y - 1)) //climb up
 			{
+				position.x = target;
 				position.y = (int)position.y - 1;
-				moved = true;
 			}
 			else
 			{
-				position.x = newX = oldX;
+				position = pos;
 			}
 		}
-		else moved = true;
+		else position.x = target;
 
 		if (currentState == AnimState::IDLE)
 		{
@@ -169,15 +145,12 @@ bool Character::move(double deltaTime, const Gamemap& map)
 	{
 		changeAnim(AnimState::IDLE);
 	}
-
-	moved = true;
-	return moved;
 }
 
 void Character::jumpivate()
 {
 	airBorne = true;
-	startJumpVector = jumpVelocity;
+	startVelocityY = jumpVelocity;
 	changeAnim(AnimState::JUMP);
 }
 

@@ -35,12 +35,11 @@ void GameObject::moveTo(double x, double y)
 KineticObject::KineticObject()
 {
 	H0height = 0;
-	Y0velocity = 0;
+	startVelocityY = 0;
 	airBorne = false;
 	freeFall = false;
 	fallT = 0.0;
 	gravity = 0.0;
-	startJumpVector = 0.0;
 	terminalVelocity = 1000.0;
 	velocity = doubleVector{ 0,0 };
 }
@@ -56,7 +55,7 @@ void KineticObject::launch(double veloX, double veloY)
 	velocity.x = veloX;
 	velocity.y = veloY;
 
-	Y0velocity = veloY;
+	startVelocityY = veloY;
 	fallT = 0.0;
 	H0height = position.y;
 }
@@ -73,7 +72,7 @@ bool KineticObject::inertiamove(double deltaTime, Gamemap& map)
 	target.x = position.x + velocity.x * deltaTime;
 
 	fallT += deltaTime;
-	target.y = H0height + Y0velocity * fallT + 0.5 * gravity * fallT * fallT;
+	target.y = H0height + startVelocityY * fallT + 0.5 * gravity * fallT * fallT;
 
 	//move pixel by pixel
 	doubleVector pos = pixelMarch(position, (int)target.y, true, map);
@@ -96,20 +95,20 @@ bool KineticObject::inertiamove(double deltaTime, Gamemap& map)
 	return false;
 }
 
-doubleVector KineticObject::pixelMarch(doubleVector start, int goal, bool vertical, Gamemap& map) //return last position before crash, or -1
+doubleVector KineticObject::pixelMarch(doubleVector start, double goal, bool vertical, Gamemap& map) //return last position before crash, or -1
 {
 	int increment = 0;
-	int dist = goal;
+	double dist = goal;
 
-	if (vertical) dist -= (int)start.y;
-	else dist -= (int)start.x;
+	if (vertical) dist -= start.y;
+	else dist -= start.x;
 
 	if (dist > 0) increment = 1;
 	else if (dist < 0) increment = -1;
 
 	if (dist != 0)
 	{
-		for (int i = 1; i <= abs(dist); i++)
+		for (int i = 1; i <= abs(dist) + 1; i++)
 		{
 			double x = start.x;
 			double y = start.y;

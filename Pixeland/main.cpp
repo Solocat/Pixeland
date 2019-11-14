@@ -30,6 +30,9 @@ int main()
 	player.changeAnim(AnimState::IDLE);
 	
 	player.moveTo(200, 200);
+	player.H0height = player.position.y;
+	player.freeFall = true;
+	player.airBorne = true;
 
 	Spritesheet bulletSprites("redpixel.png", 1, 1, false);
 	Spritesheet greenPix("greenpixel.png", 1, 1, false);
