@@ -53,9 +53,7 @@ public:
 	bool inertiamove(double deltaTime, Gamemap& map);
 	doubleVector pixelMarch(doubleVector start, double goal, bool vertical, Gamemap& map); //return last position before crash, or -1
 
-	double startVelocityY;
-	double fallT;
-	double H0height;
+	
 
 	doubleVector velocity;
 	double gravity;
@@ -63,8 +61,10 @@ public:
 
 	bool airBorne;
 	bool freeFall;
+	double startHeight;
+	double airTime;
+	double startVelocityY;
 
-	
 	sf::Vector2i crashPixel;
 };
 

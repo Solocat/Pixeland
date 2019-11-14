@@ -54,6 +54,7 @@ public:
 	double runSpeed;
 	double jumpVelocity;
 	double jumpTimeMax;
+	double fallTime;
 	
 	sf::IntRect hitbox;
 

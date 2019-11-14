@@ -34,11 +34,11 @@ void GameObject::moveTo(double x, double y)
 
 KineticObject::KineticObject()
 {
-	H0height = 0;
+	startHeight = 0;
 	startVelocityY = 0;
 	airBorne = false;
 	freeFall = false;
-	fallT = 0.0;
+	airTime = 0.0;
 	gravity = 0.0;
 	terminalVelocity = 1000.0;
 	velocity = doubleVector{ 0,0 };
@@ -56,8 +56,8 @@ void KineticObject::launch(double veloX, double veloY)
 	velocity.y = veloY;
 
 	startVelocityY = veloY;
-	fallT = 0.0;
-	H0height = position.y;
+	airTime = 0.0;
+	startHeight = position.y;
 }
 
 bool KineticObject::inertiamove(double deltaTime, Gamemap& map)
@@ -71,8 +71,8 @@ bool KineticObject::inertiamove(double deltaTime, Gamemap& map)
 	doubleVector target;
 	target.x = position.x + velocity.x * deltaTime;
 
-	fallT += deltaTime;
-	target.y = H0height + startVelocityY * fallT + 0.5 * gravity * fallT * fallT;
+	airTime += deltaTime;
+	target.y = startHeight + startVelocityY * airTime + 0.5 * gravity * airTime * airTime;
 
 	//move pixel by pixel
 	doubleVector pos = pixelMarch(position, (int)target.y, true, map);

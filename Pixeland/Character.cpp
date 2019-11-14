@@ -31,6 +31,7 @@ Character::Character()
 	freeFall = false;
 	jumpTimeMax = 0.0;
 	sprites = nullptr;
+	fallTime = 0.0;
 }
 
 bool Character::move(double deltaTime, Gamemap& map)
@@ -44,7 +45,6 @@ bool Character::move(double deltaTime, Gamemap& map)
 	}
 
 	////////////////Y_AXIS///////////////////////////
-	static double startHeight = position.y;
 
 	if (!airBorne)	//grounded
 	{
@@ -52,6 +52,7 @@ bool Character::move(double deltaTime, Gamemap& map)
 		{
 			airBorne = true;
 			freeFall = true;
+			startHeight = position.y;
 			changeAnim(AnimState::FALL);
 		}
 	}
@@ -59,8 +60,6 @@ bool Character::move(double deltaTime, Gamemap& map)
 	if (airBorne)	//airborne
 	{
 		double target;
-		static double airTime = 0.0;
-		static double fallTime = 0.0;
 
 		airTime += deltaTime;
 		if (!freeFall)	//actively jump
@@ -124,7 +123,7 @@ bool Character::move(double deltaTime, Gamemap& map)
 
 		if (pos.x != -1) //hit hard pixel
 		{
-			if (!map.isPixelHard(target, (int)position.y - 1)) //climb up
+			/*if (!map.isPixelHard((int)target, (int)position.y - 1)) //climb up
 			{
 				position.x = target;
 				position.y = (int)position.y - 1;
@@ -132,7 +131,8 @@ bool Character::move(double deltaTime, Gamemap& map)
 			else
 			{
 				position = pos;
-			}
+			}*/
+			position = pos;
 		}
 		else position.x = target;
 
