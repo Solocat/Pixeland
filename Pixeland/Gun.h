@@ -35,7 +35,6 @@ public:
 			bullet.position = pos;
 			bullet.launch(velo.x, velo.y);
 			bullet.inertiamove(timeSinceShot, map);
-
 			bullets.push_back(bullet);
 		}
 

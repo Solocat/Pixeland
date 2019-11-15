@@ -75,7 +75,7 @@ bool KineticObject::inertiamove(double deltaTime, Gamemap& map)
 	target.y = startHeight + startVelocityY * airTime + 0.5 * gravity * airTime * airTime;
 
 	//move pixel by pixel
-	doubleVector pos = pixelMarch(position, (int)target.y, true, map);
+	doubleVector pos = pixelMarch((int)target.y, true, map);
 	if (pos.x != -1)
 	{
 		position = pos;
@@ -84,7 +84,7 @@ bool KineticObject::inertiamove(double deltaTime, Gamemap& map)
 	else
 	{
 		position.y = target.y;
-		pos = pixelMarch(position, (int)target.x, false, map);
+		pos = pixelMarch((int)target.x, false, map);
 		if (pos.x != -1)
 		{
 			position = pos;
@@ -95,10 +95,12 @@ bool KineticObject::inertiamove(double deltaTime, Gamemap& map)
 	return false;
 }
 
-doubleVector KineticObject::pixelMarch(doubleVector start, double goal, bool vertical, Gamemap& map) //return last position before crash, or -1
+doubleVector KineticObject::pixelMarch(double goal, bool vertical, Gamemap& map) //return last position before crash, or -1
 {
 	int increment = 0;
 	double dist = goal;
+
+	doubleVector start = position;
 
 	if (vertical) dist -= start.y;
 	else dist -= start.x;

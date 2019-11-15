@@ -33,6 +33,7 @@ public:
 	Character();
 
 	bool move(double deltaTime, Gamemap& map);
+	doubleVector climbMarch(double goal, Gamemap& map);
 	void jumpivate();
 	void animate(double deltaTime);
 	void changeAnim(AnimState state);

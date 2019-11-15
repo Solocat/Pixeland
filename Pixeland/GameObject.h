@@ -51,7 +51,7 @@ public:
 	void justmove(double deltaTime);
 	void launch(double veloX, double veloY);
 	bool inertiamove(double deltaTime, Gamemap& map);
-	doubleVector pixelMarch(doubleVector start, double goal, bool vertical, Gamemap& map); //return last position before crash, or -1
+	doubleVector pixelMarch(double goal, bool vertical, Gamemap& map); //return last position before crash, or -1
 
 	
 

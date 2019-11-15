@@ -1,0 +1,1 @@
+gun: when bullets are moved initially, their collision is not checked

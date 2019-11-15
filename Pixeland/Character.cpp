@@ -83,7 +83,7 @@ bool Character::move(double deltaTime, Gamemap& map)
 			}
 		}
 
-		doubleVector pos = pixelMarch(position, target, true, map);
+		doubleVector pos = pixelMarch(target, true, map);
 
 		if (pos.x != -1) //collision
 		{
@@ -119,19 +119,12 @@ bool Character::move(double deltaTime, Gamemap& map)
 		double target;
 		target = position.x + velocity.x * deltaTime;
 		
-		doubleVector pos = pixelMarch(position, target, false, map);
+		//position.y--; //climb first
+		//doubleVector pos = pixelMarch(position, target, false, map);
+		doubleVector pos = climbMarch(target, map);
 
 		if (pos.x != -1) //hit hard pixel
 		{
-			/*if (!map.isPixelHard((int)target, (int)position.y - 1)) //climb up
-			{
-				position.x = target;
-				position.y = (int)position.y - 1;
-			}
-			else
-			{
-				position = pos;
-			}*/
 			position = pos;
 		}
 		else position.x = target;
@@ -145,6 +138,48 @@ bool Character::move(double deltaTime, Gamemap& map)
 	{
 		changeAnim(AnimState::IDLE);
 	}
+}
+
+doubleVector Character::climbMarch(double goal, Gamemap& map) //return last position before crash, or -1
+{
+	int increment = 0;
+	double dist = goal;
+
+	dist -= position.x;
+
+	if (dist > 0) increment = 1;
+	else if (dist < 0) increment = -1;
+
+	if (dist != 0)
+	{
+		for (int i = 1; i <= abs(dist) + 1; i++)
+		{
+			double x = position.x;
+			double y = position.y;
+
+			x += increment * i;
+
+			if (map.isPixelHard((int)x, (int)y))
+			{
+				if (map.isPixelHard((int)x, (int)y - 1))
+				{
+					cout << "sdf";
+					crashPixel.x = (int)x;
+					crashPixel.y = (int)y;
+
+					x = (int)x - increment;
+
+					return doubleVector{ x,y };
+				}
+				else
+				{
+					y--;
+					position.y--;
+				}
+			}
+		}
+	}
+	return doubleVector{ -1, -1 };
 }
 
 void Character::jumpivate()

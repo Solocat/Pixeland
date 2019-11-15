@@ -67,6 +67,12 @@ public:
 
 	void circleExplosion(double x, double y, double r, sf::Color color)
 	{
+		if (r < 1.0)
+		{
+			pixelExplosion(int(x), int(y), color);
+			return;
+		}
+
 		sf::IntRect bounds;
 		int leftBound = max(int(x - r+1), 0);
 		int topBound = max(int(y - r+1), 0);
@@ -87,10 +93,6 @@ public:
 			}
 		}
 
-		//img.createMaskFromColor(sf::Color::Magenta);
-		//tex.update(pixels, rightBound-leftBound, bottomBound-topBound, leftBound, topBound);
-		//tex.update(img);
-		//const sf::Uint8* pixels = img.getPixelsPtr();
 		tex.update(img.getPixelsPtr());
 	}
 

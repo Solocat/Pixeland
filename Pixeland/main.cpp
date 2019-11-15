@@ -201,11 +201,10 @@ int main()
 				sf::Color color = sf::Color::Transparent;
 				if (i->creative) color = sf::Color::Green;
 
-				if (currentGun == &magnum) map.circleExplosion(i->position.x, i->position.y, i->explosionRadius, color);
+				if (i->explosionRadius > 1.0) map.circleExplosion(i->position.x, i->position.y, i->explosionRadius, color);
 				else if (color == sf::Color::Green) map.pixelExplosion((int)i->position.x, (int)i->position.y, color);
 				else map.pixelExplosion(i->crashPixel.x, i->crashPixel.y, color);
-				
-				
+
 				deletions.push_back(i);
 			}
 		}
