@@ -83,11 +83,8 @@ bool Character::move(double deltaTime, Gamemap& map)
 			}
 		}
 
-		doubleVector pos = pixelMarch(target, true, map);
-
-		if (pos.x != -1) //collision
+		if (pixelMarch(target, true, map)) //collision
 		{
-			position.y = pos.y;
 			startHeight = position.y;
 			startVelocityY = 0.0;
 			airTime = 0.0;
@@ -105,12 +102,7 @@ bool Character::move(double deltaTime, Gamemap& map)
 				changeAnim(AnimState::IDLE);
 			}
 		}
-		else
-		{
-			position.y = target;
-		}
 	}
-
 
 	///////////////////////X-Axis//////////////////////////
 
@@ -131,7 +123,7 @@ bool Character::move(double deltaTime, Gamemap& map)
 	}
 }
 
-bool Character::climbMarch(double goal, Gamemap& map) //return true if reach goal
+bool Character::climbMarch(double goal, Gamemap& map) //return true if crash
 {
 	int increment = 0;
 	double dist = goal - position.x;
@@ -149,12 +141,11 @@ bool Character::climbMarch(double goal, Gamemap& map) //return true if reach goa
 		{
 			if (map.isPixelHard(pos, (int)position.y - 1))
 			{
-				cout << "sdf";
 				crashPixel.x = pos;
 				crashPixel.y = (int)position.y;
 
 				position.x = pos - increment;
-				return false;
+				return true;
 			}
 			else
 			{
@@ -163,7 +154,7 @@ bool Character::climbMarch(double goal, Gamemap& map) //return true if reach goa
 		}
 	}
 	position.x = goal;
-	return true;
+	return false;
 }
 
 void Character::jumpivate()

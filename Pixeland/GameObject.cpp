@@ -74,61 +74,54 @@ bool KineticObject::inertiamove(double deltaTime, Gamemap& map)
 	airTime += deltaTime;
 	target.y = startHeight + startVelocityY * airTime + 0.5 * gravity * airTime * airTime;
 
-	//move pixel by pixel
-	doubleVector pos = pixelMarch((int)target.y, true, map);
-	if (pos.x != -1)
+	if (pixelMarch(target.y, true, map)) //vertical crash
 	{
-		position = pos;
 		return true;
 	}
 	else
 	{
-		position.y = target.y;
-		pos = pixelMarch((int)target.x, false, map);
-		if (pos.x != -1)
+		if (pixelMarch(target.x, false, map))
 		{
-			position = pos;
 			return true;
 		}
-		else position.x = target.x;
 	}
 	return false;
 }
 
-doubleVector KineticObject::pixelMarch(double goal, bool vertical, Gamemap& map) //return last position before crash, or -1
+bool KineticObject::pixelMarch(double goal, bool vertical, Gamemap& map) //set last position before crash or return false
 {
 	int increment = 0;
 	double dist = goal;
 
-	doubleVector start = position;
-
-	if (vertical) dist -= start.y;
-	else dist -= start.x;
+	if (vertical) dist -= position.y;
+	else dist -= position.x;
 
 	if (dist > 0) increment = 1;
 	else if (dist < 0) increment = -1;
+	else return false;
 
-	if (dist != 0)
+	int x = (int)position.x;
+	int y = (int)position.y;
+
+	for (int i = 1; i <= abs(dist) + 1; i++)
 	{
-		for (int i = 1; i <= abs(dist) + 1; i++)
+		if (vertical) y += increment * i;
+		else x += increment * i;
+
+		if (map.isPixelHard(x, y))
 		{
-			double x = start.x;
-			double y = start.y;
+			crashPixel.x = x;
+			crashPixel.y = y;
 
-			if (vertical) y += increment * i;
-			else x += increment * i;
+			if (vertical) position.y = (int)y - increment;
+			else position.x = (int)x - increment;
 
-			if (map.isPixelHard((int)x, (int)y))
-			{
-				crashPixel.x = (int)x;
-				crashPixel.y = (int)y;
-
-				if (vertical) y = (int)y - increment;
-				else x = (int)x - increment;
-
-				return doubleVector{ x,y };
-			}
+			return true;
 		}
 	}
-	return doubleVector{ -1, -1 };
+
+	if (vertical) position.y = goal;
+	else position.x = goal;
+
+	return false;
 }
