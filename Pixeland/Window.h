@@ -12,6 +12,8 @@ public:
 	Window(string _title, int _width, int _height, int fps);
 	void follow(double x, double y, sf::Vector2i bounds, unsigned margin);
 
+	void zoom(int factor);
+
 	sf::IntRect getArea() const;
 
 	string title;
@@ -19,6 +21,7 @@ public:
 	sf::RenderWindow win;
 	sf::View camera;
 	int fps;
+	double zoomFactor;
 
 	bool mouseFocus;
 	bool keyFocus;

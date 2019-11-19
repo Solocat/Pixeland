@@ -21,6 +21,8 @@ void Window::follow(double x, double y, sf::Vector2i bounds, unsigned margin) //
 
 	sf::Vector2i halfSize = size / 2;
 
+	margin /= zoomFactor;
+
 	double xMin = x - margin;
 	double xMax = x + margin;
 	double yMin = y - margin;
@@ -65,4 +67,10 @@ sf::IntRect Window::getArea() const
 		size.x,
 		size.y
 	};
+}
+
+void Window::zoom(int factor)
+{
+	zoomFactor = factor;
+	camera.zoom(1.0 / double(factor));
 }

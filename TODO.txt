@@ -1,1 +1,3 @@
 gun: when bullets are moved initially, their collision is not checked, BUT collision is checked before moving again
+
+destructive slimer: hole is wide, sometimes scattered holes appear

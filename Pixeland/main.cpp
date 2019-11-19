@@ -7,7 +7,7 @@
 int main()
 {
 	Window window("Platform", 1024, 512, 60);
-	window.camera.zoom(0.25);
+	window.zoom(4);
 
 	Gamemap map("dirtmap.png");
 
@@ -187,7 +187,7 @@ int main()
 
 		if (player.move(frameTime.asSeconds(), map))
 		{
-			window.follow(player.position.x, player.position.y, sf::Vector2i(map.size), 4*8);
+			window.follow(player.position.x, player.position.y, sf::Vector2i(map.size), 128);
 		}
 		player.animate(frameTime.asSeconds());
 
