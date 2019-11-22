@@ -75,5 +75,7 @@ public:
 	double explosionRadius = 1.0;
 	bool creative = false;
 
+	void (Gamemap::*onHit)(double, double, double, sf::Color);
+
 	//const Gun* gun;
 };

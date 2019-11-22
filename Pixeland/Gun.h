@@ -9,44 +9,24 @@ public:
 	Gun()
 	{
 		shootInterval = 1.0;
-		timeSinceShot = 0.0;
-		triggerHeld = false;
 		bulletBase = nullptr;
 	}
 
-	vector<Projectile> shoot(doubleVector pos, doubleVector velo, double deltaTime, Gamemap& map) {
-
-		if (!triggerHeld) 
-		{ 
-			timeSinceShot = shootInterval;
-			triggerHeld = true;
-		}
-
-		timeSinceShot += deltaTime;
-
-		vector<Projectile> bullets;
-
-		while (timeSinceShot >= shootInterval)
+	Projectile shoot(doubleVector pos, doubleVector velo, Gamemap& map)
+	{
+		if (timer.getElapsedTime().asSeconds() >= shootInterval)
 		{
-			timeSinceShot -= shootInterval;
-
+			timer.restart();
 			Projectile bullet = *bulletBase;
-			//bullet.gun = this;
 			bullet.position = pos;
 			bullet.launch(velo.x, velo.y);
-			bullet.inertiamove(timeSinceShot, map);
-			bullets.push_back(bullet);
+			
+			return bullet;
 		}
-
-		
-		return bullets;
 	}
 
 	double shootInterval;
-	double timeSinceShot;
-
-	bool triggerHeld;
-
+	sf::Clock timer;
 
 	const Projectile* bulletBase;
 

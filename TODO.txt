@@ -1,3 +1,10 @@
 gun: when bullets are moved initially, their collision is not checked, BUT collision is checked before moving again
 
-destructive slimer: hole is wide, sometimes scattered holes appear
+destructive slimer: hole is wide, sometimes scattered holes appear (occurs only once? and when moving)
+
+very rapid climbing to the left only
+
+guns:
+semi, auto, both
+function pointers to bullets (onhit)
+

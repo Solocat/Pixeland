@@ -45,11 +45,10 @@ int main()
 	bullet.explosionRadius = 5.0;
 	//bullet.setSpritesheet(&bulletSprites);
 	bullet.drawing = &redpix;
+	bullet.onHit = &Gamemap::circleExplosion;
 	Gun magnum;
 	magnum.shootInterval = 0.5;
 	magnum.bulletBase = &bullet;
-
-
 
 	Projectile slime;
 	slime.gravity = 500.0;
@@ -59,6 +58,14 @@ int main()
 	Gun slimer;
 	slimer.shootInterval = 0.01;
 	slimer.bulletBase = &slime;
+
+	Projectile grenade;
+	grenade.gravity = 500.0;
+	grenade.explosionRadius = 10;
+	grenade.drawing = &redpix;
+	Gun grenader;
+	grenader.shootInterval = 1.0;
+	grenader.bulletBase = &grenade;
 
 	Gun* currentGun = &magnum;
 
@@ -113,6 +120,12 @@ int main()
 					currentGun = &slimer;
 					break;
 				}
+				case sf::Keyboard::Num3:
+				case sf::Keyboard::Numpad3:
+				{
+					currentGun = &grenader;
+					break;
+				}
 				default: break;
 				}
 				break;
@@ -145,8 +158,6 @@ int main()
 			}
 			case sf::Event::MouseButtonReleased:
 			{
-				magnum.triggerHeld = false;
-				slimer.triggerHeld = false;
 				break;
 			}
 			default: break;
@@ -162,14 +173,10 @@ int main()
 
 			doubleVector velo = { double(pointB.x - pointA.x), double(pointB.y - pointA.y) };
 
-			vector<Projectile> bullets;
-			bullets = currentGun->shoot(player.bulletPosition(), velo, frameTime.asSeconds(), map);
+			Projectile bullet = currentGun->shoot(player.bulletPosition(), velo, map);
 
-			for (auto& i : bullets)
-			{
-				if (right) i.creative = true;
-				projectiles.push_back(i);
-			}		
+			if (right) bullet.creative = true;
+			projectiles.push_back(bullet);
 		}
 
 		//movement block
@@ -201,7 +208,22 @@ int main()
 				sf::Color color = sf::Color::Transparent;
 				if (i->creative) color = sf::Color::Green;
 
-				if (i->explosionRadius > 1.0) map.circleExplosion(i->position.x, i->position.y, i->explosionRadius, color);
+				if (i->explosionRadius >= 10.0)
+				{
+					map.circleExplosion(i->position.x, i->position.y, i->explosionRadius, sf::Color::Transparent);
+					for (int j = 0; j < 24; j++)
+					{
+						Projectile b;
+						b.gravity = 500.0;
+						b.explosionRadius = 2.0;
+						b.drawing = &redpix;
+						b.position = i->position;
+						b.creative = i->creative;
+						b.launch(rand() % 200 - 100, rand() % 200 - 100);
+						projectiles.push_back(b);
+					}
+				}
+				else if (i->explosionRadius > 1.0) map.circleExplosion(i->position.x, i->position.y, i->explosionRadius, color);
 				else if (color == sf::Color::Green) map.pixelExplosion((int)i->position.x, (int)i->position.y, color);
 				else map.pixelExplosion(i->crashPixel.x, i->crashPixel.y, color);
 
